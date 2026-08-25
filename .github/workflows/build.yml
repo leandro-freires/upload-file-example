@@ -27,9 +27,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
       - run: npm ci
-      - name: Install Playwright Headless Browsers
-        run: npx playwright install --with-deps chromium
       - name: Run tests
-        run: npm run test:ci
+        run: npm run test
       - name: Run build
         run: npm run build
