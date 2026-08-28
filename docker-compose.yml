@@ -1,0 +1,18 @@
+services:
+  upload-file-example-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: upload_file_example_dev
+    ports:
+      - '4200:4200'
+    volumes:
+      - .:/app
+      - /app/node_modules
+  upload-file-example-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: upload_file_example_prod
+    ports:
+      - '8080:80'
