@@ -28,18 +28,24 @@ export class App {
     LIMIT_FILE_ERROR: 'O limite máximo de arquivos é 5'
   };
 
-  showAlert = signal<AlertMessage | null>(null);
-  fileList = signal<FileToSend[]>([]);
+  private _fileList = signal<FileToSend[]>([]);
+
+  private _showAlert = signal<AlertMessage | null>(null);
+
+  readonly fileList = this._fileList.asReadonly();
+
+  readonly showAlert = this._showAlert.asReadonly();
+
   hasFilesWithError = computed(() => this.fileList().some(f => typeof f.error !== 'undefined'));
 
   onFilesSelected(e: any): void {
-    this.showAlert.set(null);
+    this.addAlertMessage(null);
     const files: FileList = e.target.files;
 
     if (!files) return;
 
     if (this.fileList().length + files.length > 5) {
-      this.showAlert.set({ type: 'danger', message: this.ERROR_DICTIONARY['LIMIT_FILE_ERROR'] });
+      this.addAlertMessage({ type: 'danger', message: this.ERROR_DICTIONARY['LIMIT_FILE_ERROR'] });
       return;
     }
 
@@ -56,27 +62,35 @@ export class App {
         fileTemp.error = 'HAS_FILE_ERROR';
       }
 
-      this.fileList.update(currentValues => [...currentValues, fileTemp]);
+      this.addFileToSend(fileTemp);
     });
+  }
+
+  addFileToSend(file: FileToSend): void {
+    this._fileList.update(currentValues => [...currentValues, file]);
+  }
+
+  addAlertMessage(alertMessage: AlertMessage | null): void {
+    this._showAlert.set(alertMessage);
   }
 
   onSend(): void {
     if (!this.fileList().length || this.hasFilesWithError()) return;
     const filesToSend = this.fileList().map(f => f.file);
     console.log(filesToSend);
-    this.showAlert.set({ type: 'success', message: 'Os arquivos foram enviados com sucesso!' });
+    this.addAlertMessage({ type: 'success', message: 'Os arquivos foram enviados com sucesso!' });
     this.onRefresh();
   }
 
   onRefresh(): void {
-    this.fileList.set([]);
+    this._fileList.set([]);
   }
 
   onRemoveFile(id: string): void {
-    this.fileList.update(currentValues => currentValues.filter(f => f.id !== id));
+    this._fileList.update(currentValues => currentValues.filter(f => f.id !== id));
   }
 
   onClose(): void {
-    this.showAlert.set(null);
+    this.addAlertMessage(null);
   }
 }
